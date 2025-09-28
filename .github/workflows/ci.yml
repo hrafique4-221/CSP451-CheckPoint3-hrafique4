@@ -71,12 +71,11 @@ jobs:
           path: coverage
           if-no-files-found: warn
 
-      - name: Upload coverage to Codecov
+      - name: Upload coverage to Codecov (non-blocking)
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # required for private repos
           files: ./coverage/lcov.info
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           verbose: true
 
       - name: Fail if coverage < 80%
@@ -85,7 +84,7 @@ jobs:
             echo "coverage/coverage-summary.json not found. Ensure your tests output coverage."
             exit 1
           fi
-          node -e "const s=require('./coverage/coverage-summary.json'); const pct=s.total.lines.pct||0; console.log('Line coverage:', pct+'%'); if (pct < 80) { console.error('Coverage below 80%'); process.exit(1); }"
+          node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8')); const pct=s.total?.lines?.pct||0; console.log('Line coverage:', pct+'%'); if (pct < 80) { console.error('Coverage below 80%'); process.exit(1); }"
 
   build:
     name: Build Job
@@ -125,9 +124,3 @@ jobs:
           name: build-directory
           path: build
           if-no-files-found: ignore
-- name: Upload coverage to Codecov
-  uses: codecov/codecov-action@v4
-  with:
-    files: ./coverage/lcov.info
-    fail_ci_if_error: false   # 👈 don’t fail if upload has issues
-    verbose: true
