@@ -7,8 +7,8 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
-      globals: globals.node
+      globals: globals.node,
     },
-    ignores: ["node_modules/**", "coverage/**", "dist/**", "build/**"]
-  }
+    ignores: ["node_modules/**", "coverage/**", "dist/**", "build/**"],
+  },
 ];
