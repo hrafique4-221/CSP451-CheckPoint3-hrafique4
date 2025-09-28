@@ -23,6 +23,13 @@
     "collectCoverageFrom": [
       "src/**/*.js",
       "!**/node_modules/**"
+    ],
+    "coverageReporters": [
+      "json",
+      "json-summary",
+      "lcov",
+      "text",
+      "clover"
     ]
   }
 }
