@@ -20,6 +20,9 @@
     "transform": {},
     "coverageDirectory": "coverage",
     "collectCoverage": true,
-    "collectCoverageFrom": ["src/**/*.js", "!**/node_modules/**"]
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!**/node_modules/**"
+    ]
   }
 }
