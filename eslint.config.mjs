@@ -2,13 +2,18 @@ import js from "@eslint/js";
 import globals from "globals";
 
 export default [
-  js.configs.recommended,
   {
+    files: ["**/*.js"],
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: "latest",
       sourceType: "module",
-      globals: globals.node,
+      globals: {
+        ...globals.node,
+        ...globals.jest,   // 👈 add Jest globals
+      },
     },
-    ignores: ["node_modules/**", "coverage/**", "dist/**", "build/**"],
+    rules: {
+      ...js.configs.recommended.rules,
+    },
   },
 ];
