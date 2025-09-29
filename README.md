@@ -4,7 +4,7 @@
 
 This repo contains the workflows for Checkpoint 3:
 
--  CI Pipeline (Lint, Test, Build)
--  Daily Dependency/Security Audit
--  GitHub Pages Deployment
+- CI Pipeline (Lint, Test, Build)
+- Daily Dependency/Security Audit
+- GitHub Pages Deployment
 - Custom Composite Action

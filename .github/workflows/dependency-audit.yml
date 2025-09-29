@@ -1,0 +1,70 @@
+name: Daily Dependency & Security Audit
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # every day at 09:00 UTC
+  workflow_dispatch: # allow manual run
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node & install deps (reusable)
+        uses: ./.github/actions/setup-node-install
+        with:
+          node-version: "18"
+
+      - name: NPM audit (JSON)
+        id: audit
+        run: |
+          set -e
+          npm audit --json > audit.json || true
+          echo "file=audit.json" >> "$GITHUB_OUTPUT"
+
+      - name: Decide if vulnerabilities exist
+        id: parse
+        run: |
+          total=$(node -e "const r=require('./audit.json'); console.log(r.metadata?.vulnerabilities ? Object.values(r.metadata.vulnerabilities).reduce((a,b)=>a+b,0) : 0)")
+          echo "total=$total" >> "$GITHUB_OUTPUT"
+          echo "Found vulnerabilities: $total"
+
+      - name: Create issue if vulnerabilities found
+        if: ${{ steps.parse.outputs.total != '0' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('audit.json','utf8');
+            const total = Number(process.env.TOTAL || 0);
+            const title = `Security audit detected ${total} vulnerabilities`;
+            const body = [
+              'Automated daily security audit found vulnerabilities.',
+              '',
+              '```json',
+              report.substring(0, 60000), // keep issue size sane
+              '```',
+              '',
+              '_This issue was created by the Daily Dependency & Security Audit workflow._'
+            ].join('\n');
+            // search for an open issue with same title
+            const existing = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open "${title}"`
+            });
+            if (existing.data.items.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                labels: ['security','automation'],
+                body
+              });
+            }
+        env:
+          TOTAL: ${{ steps.parse.outputs.total }}
