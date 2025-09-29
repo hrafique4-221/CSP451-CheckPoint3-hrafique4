@@ -1,0 +1,26 @@
+name: "Setup Node and Install Dependencies"
+description: "Sets up Node.js and installs dependencies with npm ci (or npm install)"
+inputs:
+  node-version:
+    description: "Node.js version"
+    required: false
+    default: "18"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        if [ -f package-lock.json ]; then
+          echo "Using npm ci"
+          npm ci
+        else
+          echo "No package-lock.json found. Using npm install"
+          npm install
+        fi
